@@ -8,16 +8,6 @@ Um player desenvolvido com JavaScript puro e Electron.
 npm install
 ```
 
-## Desenvolvimento
-
-### Executar localmente
-```bash
-# Servir arquivos localmente para debug
-python -m http.server 8000
-# Ou utilizando live server na porta que ele gerar
-# Acesse: http://localhost:8000/src
-```
-
 ## Builds
 
 ### Babel (Web)
@@ -39,6 +29,15 @@ npm run build:linux
 
 # Build para todas as plataformas
 npm run build:all
+```
+
+### Executar localmente
+```bash
+# Servir arquivos localmente para debug
+python -m http.server 8000
+# Ou utilizando live server na porta que ele gerar
+# Acesse para debugar: http://localhost:8000/src
+# Acesse após buildar: http://localhost:8000/public
 ```
 
 ## Estrutura de Saída
