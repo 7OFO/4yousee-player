@@ -1,6 +1,6 @@
 # Player 4USee
 
-Um player desenvolvido com JavaScript puro.
+Um player desenvolvido com JavaScript puro e Electron.
 
 ## Instalação
 
@@ -12,30 +12,18 @@ npm install
 
 ### Executar localmente
 ```bash
-# Build de desenvolvimento (arquivos separados)
-npm run build:dev
-
-# Servir arquivos localmente
+# Servir arquivos localmente para debug
 python -m http.server 8000
 # Ou utilizando live server na porta que ele gerar
-# Acesse: http://localhost:8000/public
-```
-
-### Build de produção
-```bash
-# Build otimizado (bundle único)
-npm run build:prod
+# Acesse: http://localhost:8000/src
 ```
 
 ## Builds
 
 ### Babel (Web)
 ```bash
-# Desenvolvimento
-npm run build:dev
 
-# Produção
-npm run build:prod
+npm run build:web
 
 # Limpar builds
 npm run clean
@@ -55,7 +43,7 @@ npm run build:all
 
 ## Estrutura de Saída
 
-- **Desenvolvimento**: `public/` - arquivos separados para debug
+- **Desenvolvimento**: `src/` - arquivos separados para debug
 - **Produção**: `public/` - bundle único otimizado
 - **Electron**: `dist/` - executáveis para desktop
 
