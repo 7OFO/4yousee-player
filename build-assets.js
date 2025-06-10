@@ -184,7 +184,7 @@ function processCSS(mode = 'development') {
     // Usar configuração do postcss.config.js
     const postcssCommand = `npx postcss ${cssInput} --output ${cssOutput}`;
     
-    executeCommand(postcssCommand, 'Processamento CSS para Smart TVs');
+    executeCommand(postcssCommand, 'Processamento CSS');
 }
 
 function copyStaticFiles(mode = 'development') {
