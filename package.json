@@ -5,7 +5,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "build:web": "node build-assets.js",
+    "build:web": "node build-assets.js prod",
     "build": "npm run build:web && electron-builder",
     "build:win": "npm run build:web && electron-builder --win",
     "build:linux": "npm run build:web && electron-builder --linux",
