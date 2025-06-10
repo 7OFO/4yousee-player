@@ -70,8 +70,7 @@ function createDirectories() {
     
     const dirs = [
         path.join(__dirname, 'public', 'js'),
-        path.join(__dirname, 'public', 'css'),
-        path.join(__dirname, 'public', 'dist')
+        path.join(__dirname, 'public', 'css')
     ];
     
     dirs.forEach(dir => {
@@ -89,8 +88,7 @@ function cleanPublic() {
     
     const dirsToClean = [
         path.join(__dirname, 'public', 'js'),
-        path.join(__dirname, 'public', 'css'),
-        path.join(__dirname, 'public', 'dist')
+        path.join(__dirname, 'public', 'css')
     ];
     
     dirsToClean.forEach(dir => {
@@ -172,8 +170,8 @@ function transpileJavaScript(mode = 'development') {
 function processCSS(mode = 'development') {
     logHeader('Processando CSS com PostCSS');
     
-    const cssInput = path.join(__dirname, 'public', 'style.css');
-    const cssOutput = path.join(__dirname, 'public', 'css', mode === 'production' ? 'style.min.css' : 'style.css');
+    const cssInput = path.join(__dirname, 'src', 'style.css');
+    const cssOutput = path.join(__dirname, 'public/css', mode === 'production' ? 'style.min.css' : 'style.css');
     
     if (!fs.existsSync(cssInput)) {
         logWarning('Arquivo style.css não encontrado em /public');
@@ -193,9 +191,7 @@ function copyStaticFiles(mode = 'development') {
     logHeader('Copiando Arquivos Estáticos');
     
     const filesToCopy = [
-        { src: 'src/playlist.json', dest: 'public/playlist.json' },
-        { src: 'src/style.css', dest: 'public/style.css' },
-        { src: 'src/playlist.json', dest: 'public/dist/playlist.json' }
+        { src: 'src/playlist.json', dest: 'public/playlist.json' }
     ];
     
     filesToCopy.forEach(({ src, dest }) => {
@@ -405,9 +401,9 @@ function main() {
         
         cleanPublic();
         createDirectories();
+        copyStaticFiles(buildMode);
         transpileJavaScript(buildMode);
         processCSS(buildMode);
-        copyStaticFiles(buildMode);
         showBuildSummary(buildMode);
         
     } catch (error) {
