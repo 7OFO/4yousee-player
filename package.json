@@ -1,0 +1,84 @@
+{
+  "name": "player-4USee",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build:web": "node build-assets.js",
+    "build": "npm run build:web && electron-builder",
+    "build:win": "npm run build:web && electron-builder --win",
+    "build:linux": "npm run build:web && electron-builder --linux",
+    "build:all": "npm run build:web && electron-builder --win --linux",
+    "build:auto": "npm run build:web && node build.js",
+    "build:auto:win": "npm run build:web && node build.js windows",
+    "build:auto:linux": "npm run build:web && node build.js linux",
+    "clean": "node build.js clean",
+    "prebuild": "npm run clean"
+  },
+  "build": {
+    "appId": "com.player.4usee",
+    "productName": "player-4USee",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "public/**/*",
+      "src/**/*",
+      "cache/**/*",
+      "log/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/icon.ico"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        },
+        {
+          "target": "rpm",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/icon.png",
+      "category": "AudioVideo"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.0.0",
+    "@babel/core": "^7.23.0",
+    "@babel/cli": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/plugin-transform-runtime": "^7.23.0",
+    "postcss": "^8.4.31",
+    "postcss-cli": "^10.1.0",
+    "autoprefixer": "^10.4.16",
+    "cssnano": "^6.0.1",
+    "postcss-preset-env": "^9.3.0"
+  }
+}

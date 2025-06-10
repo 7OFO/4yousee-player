@@ -1,0 +1,45 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "browsers": [
+            "Chrome >= 38",
+            "Safari >= 9",
+            "Android >= 4.4"
+          ]
+        },
+        "useBuiltIns": false,
+        "modules": false
+      }
+    ]
+  ],
+  "plugins": [
+    "@babel/plugin-transform-runtime"
+  ],
+  "env": {
+    "production": {
+      "presets": [
+        [
+          "@babel/preset-env",
+          {
+            "targets": {
+              "browsers": [
+                "Chrome >= 38",
+                "Safari >= 9", 
+                "Android >= 4.4"
+              ]
+            },
+            "useBuiltIns": false,
+            "modules": false
+          }
+        ]
+      ]
+    },
+    "development": {
+      "presets": [],
+      "plugins": []
+    }
+  }
+}
