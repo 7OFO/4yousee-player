@@ -6,6 +6,8 @@ function VideoManager(video1Element, video2Element) {
   var inactiveVideo = video2;
   var isTransitioning = false;
   var videoLoadTimeout;
+  var currentMediaType = 'video'; // 'video' ou 'image'
+  var imageDisplayTimeout;
 
   function getActiveVideo() {
     return activeVideo;
@@ -29,6 +31,21 @@ function VideoManager(video1Element, video2Element) {
     inactiveVideo = temp;
   }
 
+  function isImageFile(url) {
+    var imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'];
+    var urlLower = url.toLowerCase();
+    return imageExtensions.some(function(ext) {
+      return urlLower.includes(ext);
+    });
+  }
+
+  function getMediaType(item) {
+    if (item.type === 'image' || isImageFile(item.url)) {
+      return 'image';
+    }
+    return 'video';
+  }
+
   function clearVideoListeners(videoElement) {
     videoElement.onended = null;
     videoElement.onerror = null;
@@ -41,9 +58,93 @@ function VideoManager(video1Element, video2Element) {
       clearTimeout(videoLoadTimeout);
       videoLoadTimeout = null;
     }
+    
+    if (imageDisplayTimeout) {
+      clearTimeout(imageDisplayTimeout);
+      imageDisplayTimeout = null;
+    }
+  }
+
+  function setupImageInVideoContainer(videoElement, item, onEndedCallback, onErrorCallback, onCanPlayCallback) {
+    // Limpar o vídeo e usar como container para imagem
+    videoElement.src = '';
+    videoElement.style.backgroundImage = 'url(' + item.url + ')';
+    videoElement.style.backgroundSize = 'cover';
+    videoElement.style.backgroundPosition = 'center';
+    videoElement.style.backgroundRepeat = 'no-repeat';
+    
+    var imageLoaded = false;
+    
+    // Preload da imagem para detectar erros
+    var img = new Image();
+    
+    // Timeout de segurança para imagens que demoram muito
+    var loadTimeout = setTimeout(function() {
+      if (!imageLoaded) {
+        clearImageFromVideoContainer(videoElement);
+        logVideoError('Timeout no carregamento da imagem: ' + item.description, item.url, 'TIMEOUT');
+        if (onErrorCallback) {
+          onErrorCallback(videoElement, item);
+        }
+      }
+    }, 10000); // 10 segundos timeout
+    
+    img.onload = function() {
+      imageLoaded = true;
+      clearTimeout(loadTimeout);
+      
+      if (onCanPlayCallback) {
+        onCanPlayCallback(videoElement, item, 'canplaythrough');
+      }
+      
+      // Simular evento 'ended' após o tempo de exibição
+      var displayTime = item.duration || 5000; // 5 segundos padrão
+      imageDisplayTimeout = setTimeout(function() {
+        if (onEndedCallback) {
+          onEndedCallback();
+        }
+      }, displayTime);
+    };
+    
+    img.onerror = function() {
+      imageLoaded = true;
+      clearTimeout(loadTimeout);
+      
+      // Limpar o background da imagem com erro
+      clearImageFromVideoContainer(videoElement);
+      
+      // Limpar timeout se existir
+      if (imageDisplayTimeout) {
+        clearTimeout(imageDisplayTimeout);
+        imageDisplayTimeout = null;
+      }
+      
+      if (onErrorCallback) {
+        onErrorCallback(videoElement, item);
+      }
+    };
+    
+    img.src = item.url;
+  }
+
+  function clearImageFromVideoContainer(videoElement) {
+    videoElement.style.backgroundImage = '';
+    videoElement.style.backgroundSize = '';
+    videoElement.style.backgroundPosition = '';
+    videoElement.style.backgroundRepeat = '';
   }
 
   function setupVideoHandlers(videoElement, item, onEndedCallback, onErrorCallback, onCanPlayCallback) {
+    var mediaType = getMediaType(item);
+    currentMediaType = mediaType;
+    
+    if (mediaType === 'image') {
+      setupImageInVideoContainer(videoElement, item, onEndedCallback, onErrorCallback, onCanPlayCallback);
+      return;
+    }
+    
+    // Limpar qualquer imagem de background anterior
+    clearImageFromVideoContainer(videoElement);
     videoElement.onended = function() {
       if (videoElement === activeVideo && onEndedCallback) {
         onEndedCallback();
@@ -136,8 +237,14 @@ function VideoManager(video1Element, video2Element) {
       setTimeout(function() {
         swapVideos();
         inactiveVideo.className = 'hidden';
-        inactiveVideo.pause();
-        inactiveVideo.currentTime = 0;
+        
+        // Limpar mídia anterior
+        if (currentMediaType === 'video') {
+          inactiveVideo.pause();
+          inactiveVideo.currentTime = 0;
+        } else {
+          clearImageFromVideoContainer(inactiveVideo);
+        }
         
         isTransitioning = false;
         
@@ -191,7 +298,9 @@ function VideoManager(video1Element, video2Element) {
     setupVideoHandlers: setupVideoHandlers,
     startCrossfade: startCrossfade,
     playVideoWithRetry: playVideoWithRetry,
-    initializeVideo: initializeVideo
+    initializeVideo: initializeVideo,
+    getMediaType: getMediaType,
+    clearImageFromVideoContainer: clearImageFromVideoContainer
   };
 }
 

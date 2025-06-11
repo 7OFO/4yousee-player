@@ -15,20 +15,13 @@ function VideoPlayer(video1Element, video2Element, descriptionElement) {
   }
 
   function onVideoError(videoElement, item) {
-    var errorMsg = 'Erro no carregamento do vídeo: ' + item.description + '. Pulando para o próximo.';
+    var mediaType = videoManager.getMediaType(item);
+    var errorMsg = 'Erro no carregamento da ' + (mediaType === 'image' ? 'imagem' : 'vídeo') + ': ' + item.description + '. Pulando para o próximo.';
     logVideoError(errorMsg, item.url, 'LOAD_FAILED');
     
-    if (videoElement === videoManager.getActiveVideo()) {
-      playlistManager.moveToNext();
-      crossfadeToNext();
-    } else {
-      playlistManager.moveToNext();
-      var nextItem = playlistManager.getCurrentItem();
-      // Log de troca de vídeo para vídeo inativo
-      logVideoChange(item.description || item.url, nextItem.description || nextItem.url, playlistManager.getCurrentIndex());
-      videoElement.src = nextItem.url;
-      videoElement.load();
-    }
+    // Sempre mover para o próximo item e fazer crossfade
+    playlistManager.moveToNext();
+    crossfadeToNext();
   }
 
   function onVideoCanPlay(videoElement, item, eventType) {
@@ -60,7 +53,7 @@ function VideoPlayer(video1Element, video2Element, descriptionElement) {
       return;
     }
 
-    var videoUrl = item.url;
+    var mediaType = videoManager.getMediaType(item);
     
     if (videoManager.isCurrentlyTransitioning()) {
       logEvent('Transição em andamento, aguardando...');
@@ -74,17 +67,21 @@ function VideoPlayer(video1Element, video2Element, descriptionElement) {
     
     videoManager.clearVideoListeners(video1Element);
     videoManager.clearVideoListeners(video2Element);
-    inactiveVideo.src = videoUrl;
     
     if (typeof preloadNextVideos === 'function') {
       preloadNextVideos(index, playlistManager.getPlaylist());
     }
 
     videoManager.setupVideoHandlers(inactiveVideo, item, onVideoEnded, onVideoError, onVideoCanPlay);
-    inactiveVideo.load();
     
-    // Estratégia de reprodução otimizada para Smart TVs
-    videoManager.playVideoWithRetry(inactiveVideo);
+    if (mediaType === 'video') {
+      inactiveVideo.src = item.url;
+      inactiveVideo.load();
+      
+      // Estratégia de reprodução otimizada para Smart TVs
+      videoManager.playVideoWithRetry(inactiveVideo);
+    }
+    // Para imagens, o setupVideoHandlers já cuida de tudo
   }
 
   function crossfadeToNext() {
@@ -106,28 +103,33 @@ function VideoPlayer(video1Element, video2Element, descriptionElement) {
   function initializeFirstVideo() {
     if (!playlistManager.isPlaylistEmpty()) {
       var firstItem = playlistManager.getCurrentItem();
-      var videoUrl = firstItem.url;
       var activeVideo = videoManager.getActiveVideo();
       var inactiveVideo = videoManager.getInactiveVideo();
+      var mediaType = videoManager.getMediaType(firstItem);
 
-      activeVideo.src = videoUrl;
       activeVideo.className = 'active';
       inactiveVideo.className = 'hidden';
       
       videoManager.setupVideoHandlers(activeVideo, firstItem, onVideoEnded, onVideoError, onVideoCanPlay);
-      activeVideo.load();
       
-      videoManager.playVideoWithRetry(activeVideo, function() {
-        logEvent('Primeiro video iniciado com sucesso: ' + firstItem.description + ' (remoto)');
-      }, function(error) {
-        logError('Erro ao iniciar o primeiro video: ' + error.message);
-      });
+      if (mediaType === 'video') {
+        activeVideo.src = firstItem.url;
+        activeVideo.load();
+        
+        videoManager.playVideoWithRetry(activeVideo, function() {
+          logEvent('Primeiro video iniciado com sucesso: ' + firstItem.description + ' (remoto)');
+        }, function(error) {
+          logError('Erro ao iniciar o primeiro video: ' + error.message);
+        });
+        
+        logEvent('Aguardando primeiro vídeo: ' + firstItem.description + ' (remoto)');
+      } else {
+        logEvent('Aguardando primeira imagem: ' + firstItem.description + ' (remoto)');
+      }
       
       if (typeof preloadNextVideos === 'function') {
         preloadNextVideos(0, playlistManager.getPlaylist());
       }
-      
-      logEvent('Aguardando primeiro vídeo: ' + firstItem.description + ' (remoto)');
     }
   }
 
